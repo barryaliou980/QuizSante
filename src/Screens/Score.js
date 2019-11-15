@@ -1,10 +1,10 @@
 import React, {Component} from 'react';  
-import {TouchableOpacity, StyleSheet, Text, View,Dimensions} from 'react-native';  
+import {TouchableOpacity, StyleSheet, Text, View,Dimensions} from 'react-native';
   
 const {width, height} = Dimensions.get('window')
 export default class Score extends Component {  
 
-  render() {  
+  render() { 
     return (  
       <View style={styles.container}>
         <Text>score !!!</Text>

@@ -1,11 +1,15 @@
 import React from 'react'
 import Navigation from './src/Navigation/Navigation'
+import { Provider } from 'react-redux'
+import {Store} from './src/Utils'
 
 export default class App extends React.Component{
   render(){
-  	console.disableYellowBox =true
+    console.disableYellowBox =true
     return (
-    	<Navigation />
+      <Provider store={Store}>
+        <Navigation />
+      </Provider>
     );
   }
 }

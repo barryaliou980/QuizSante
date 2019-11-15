@@ -1,21 +1,51 @@
-import React, { Component } from 'react';
-import {Alert,BackHandler,StyleSheet,Text,View,Button,Dimensions,ScrollView,TouchableOpacity, TouchableHighlight } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import Data from '../Data/Data'
+import React from "react";
+import {SafeAreaView,StyleSheet,Text,View,Dimensions,Alert} from "react-native";
+import { quizData } from "../Data/quizData";
+import { Button, ButtonContainer } from "./Button";
 import Backhandle from './ExitApp'
+import {ProgressBar,vrai_icon,faux_icon} from '../Utils'
+import LottieView from 'lottie-react-native';
 
-import {ProgressBar} from '../Utils'
+
 const { width, height } = Dimensions.get('window')
-let tab_new = []
 
 
-export default class Quiz extends Component {
+export default class Quiz extends React.Component {
 
-  onBack = () => {
+  constructor(props) {
+    super(props);
+    this.state = {
+      score: 0,
+      activeQuestionIndex: 0,
+      answered: false,
+      quizData:quizData,
+      isDisable: false,
+      answerCorrect: false,
+      totalCount: 0,
+    }
+  }
+
+  componentDidMount(){
+    this.setState({
+      totalCount:this.state.quizData.length
+    })
+  }
+  Icons = icon => icon[Math.floor(Math.random() * icon.length)]
+  alertIcon(correct){
+    const icon = correct ? this.Icons(vrai_icon) : this.Icons(faux_icon)
+    return <LottieView source={icon} autoPlay loop={false} />;
+  }
+
+  random(){
+   const {quizData,answerCorrect} = this.state
+   return  Math.floor(Math.random() * quizData.length)
+  }
+
+  onBack = () =>{
         if(true){
           Alert.alert(
              "Quitter dans l'App",
-             "Voulez-vous Annuler le Quiz",
+             "Voulez-vous quitter dans Quiz Santé",
              [
               {text: "Non", onPress: () =>{}, style: "cancel"},
               {text: "OUI", onPress:() =>this.props.navigation.goBack()},
@@ -25,160 +55,128 @@ export default class Quiz extends Component {
           return true;
         }
         return false;
+}
+
+  answer = (correct,question,id) => {
+    this.setState({isDisable:true})
+    this.alertIcon()
+    this.setState(
+      state => {
+        const nextState = { answered: true };
+        if (correct) {
+          nextState.score = state.score + 1;
+          nextState.answerCorrect = true;
+          // alert(question)
+        } else {
+          nextState.answerCorrect = false;
+        }
+
+        return nextState;
+      }, () => { setTimeout(() => this.nextQuestion(), 1000); }
+    );
+  };
+
+  nextQuestion = () => {
+     this.setState(state => {
+      if(state.activeQuestionIndex < 4){
+        const nextIndex = state.activeQuestionIndex + 1;
+        return {
+          activeQuestionIndex: nextIndex,
+          answered: false,
+          isDisable:false
+        };
+      } else{
+          this.props.navigation.navigate('FinQuiz',{
+              score: this.state.score,
+              sizeTab:this.state.totalCount
+          })
       }
-
-  constructor(props){
-    super(props);
-    this.qst_id = 0
-    this.score = 0
-    const data_new = Data.quiz.quiz1
-    tab_new = Object.keys(data_new).map( function(k) { return data_new[k] })
-    this.state = {
-        question : tab_new[this.qst_id].question,
-        reponse  : tab_new[this.qst_id].reponse,
-        borderColor: 'transparent',
-        option_id:0,
     }
-  }
-
-
-  _handleAnswer(UserReponse, option_id) {
-        if(tab_new[this.qst_id].reponse == UserReponse)
-          this.score ++
-        setTimeout(() =>{
-          if(this.qst_id<tab_new.length-1){ 
-            this.qst_id++
-            this.setState({
-                 question : tab_new[this.qst_id].question,
-                 reponse  : tab_new[this.qst_id].reponse,
-            });
-          }
-          else{
-            this.props.navigation.navigate('FinQuiz',{
-              score: this.score,
-              sizeTab: tab_new.length
-            })
-          }
-          this.setState({option_id: 0})
-        },1300)
-  }
+    );
+  };
 
   render() {
-      var op = tab_new[this.qst_id].reponse
-      var op_id = this.state.option_id
+   const {q = quizData,isDisable,answerCorrect} = this.state
+   const question = q[this.random()];
     return (
-      <Backhandle  onBack={this.onBack} >
-      <ScrollView style={{backgroundColor: 'rgb(3,1,59)'}}>
-          <View style={styles.main_container}>
-              <View style={styles.container}>
-                    <View style={styles.questionContent}>
-                    <View style={styles.contentProgress}>
-                          <ProgressBar score={this.score} padding={10} />
-                          <View>
-                              <Text style={styles.textScore}>
-                                {this.score+"/"+tab_new.length}
-                              </Text>
-                          </View>
-                     </View>
-                      <Text style={styles.question}>
-                        {this.state.question}
-                      </Text>
-                    </View>
-                    <View style={{paddingTop: 40}}/>
+      <Backhandle  onBack={this.onBack}>
+      <View style={styles.container}>
+        <SafeAreaView style={styles.safearea}>
+          <View>
+            <View style={styles.contentProgress}>
+                <ProgressBar score={this.state.score} padding={10} />
+                <View>
+                    <Text style={styles.textScore}>
+                      {`${this.state.score}/${this.state.totalCount}`}
+                    </Text>
+                </View>
+            </View>
+            <View style={styles.questionContent}>
+              <Text style={styles.question}>
+                  {question.question}
+                </Text>
+            </View>
 
-                    <TouchableHighlight
-                      style={[styles.button, {borderColor:(op == "option1" && op_id == 1) ? "green" :(op != "option1" && op_id == 1) ? "red" : "transparent"}]}
-                      underlayColor='rgb(168,100,31)'
-                      onPress={() => this._handleAnswer("option1", this.setState({option_id:1}))}
-                      >
-                      <Text style={styles.answer}>
-                         {tab_new[this.qst_id].option1}
-                      </Text>
-                    </TouchableHighlight>
-
-                    <TouchableHighlight
-                      style={[styles.button, {borderColor:(op == "option2" && op_id == 2) ? "green" :(op != "option2" && op_id == 2) ? "red" : "transparent"}]}
-                      underlayColor='rgb(168,100,31)'
-                      onPress={() => this._handleAnswer("option2" , this.setState({option_id:2}))}
-                      >
-                      <Text style={styles.answer}>{tab_new[this.qst_id].option2}</Text>
-                    </TouchableHighlight>
-
-                    <TouchableHighlight
-                      style={[styles.button, {borderColor:(op == "option3" && op_id == 3) ? "green" :(op != "option3" && op_id == 3) ? "red" : "transparent"}]}
-                      underlayColor='rgb(168,100,31)'
-                      onPress={() => this._handleAnswer("option3" , this.setState({option_id:3}))}
-                      >
-                      <Text style={styles.answer}>{tab_new[this.qst_id].option3}</Text>
-                    </TouchableHighlight>
-
-                    <TouchableHighlight
-                      style={[styles.button, {borderColor:(op == "option4" && op_id == 4) ? "green" :(op != "option4" && op_id == 4) ? "red" : "transparent"}]}
-                      underlayColor='rgb(168,100,31)'
-                      onPress={() => this._handleAnswer("option4" , this.setState({option_id:4}))}
-                      >
-                      <Text style={styles.answer}>{tab_new[this.qst_id].option4}</Text>
-                    </TouchableHighlight>
-                  </View>
+            {isDisable && this.alertIcon(answerCorrect)}
+            <ButtonContainer>
+              {question.answers.map(answer => (
+                <Button
+                key={answer.id}
+                text={answer.text}
+                id={answer.id}
+                corr={answer.correct}
+                disabled={isDisable}
+                onPress={() => this.answer(answer.correct,question.question, answer.id)}
+                />
+              ))}
+            </ButtonContainer>
           </View>
-      </ScrollView>
-      </Backhandle>
 
-    );
+        </SafeAreaView>
+      </View>
+      </Backhandle>
+    ); 
   }
 }
 
-
 const styles = StyleSheet.create({
-  questionContent: {
-    backgroundColor: 'rgb(168,100,31)',
-    width: width,
-    borderBottomLeftRadius: 100,
-    borderBottomRightRadius: 100,
-    paddingTop:40,
-  },
-  question: {
-    fontSize: 28,
-    margin: 15,
-    color: "white",
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 50,
-    marginBottom: 50
-  },
-  main_container: {
-    flex: 1,
-  },
   container: {
+    backgroundColor: 'rgb(3,1,59)',
     flex: 1,
-    flexDirection: 'column',
-    justifyContent: "space-between",
+    paddingHorizontal: 20
   },
-  answer: {
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'left',
-    padding: 10,
-    marginLeft: 20
+  text: {
+    color: "#fff",
+    fontSize: 25,
+    textAlign: "center",
+    letterSpacing: -0.02,
+    fontWeight: "600"
   },
-  button: {
-    backgroundColor: 'rgb(168,100,31)',
-    flexDirection: 'row',
-    borderTopLeftRadius:30,
-    borderBottomLeftRadius:30,
-    marginVertical: 3,
-    borderColor:'#fff',
-    borderWidth:5,
-    marginHorizontal: 20
-  }, 
-textScore:{
-		fontWeight:'bold',
-		fontSize:19,
-    color:'white'
+  safearea: {
+    flex: 1,
+    marginTop: 100,
+    justifyContent: "space-between"
   },
-contentProgress:{
+  contentProgress:{
     flexDirection:'row',
     paddingHorizontal:40,
     justifyContent:'space-around',
+  },
+  textScore:{
+    fontWeight:'bold',
+    fontSize:19,
+    color:'white'
+  },
+  questionContent: {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 15,
+    paddingVertical:30,
+    marginVertical:20,
+  },
+  question: {
+    textAlign: 'center',
+    color: "#fff",
+    fontSize: 25,
+    fontWeight:'bold'
   },
 });

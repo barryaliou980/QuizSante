@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import {StyleSheet,StatusBar,TouchableOpacity,View,Text,Animated,Dimensions,Easing, AsyncStorage, ImageBackground } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import AB from 'react-native-action-button';
 import FW5 from 'react-native-vector-icons/FontAwesome5'
 import Animation from 'lottie-react-native';
 import confetti from '../assets/lottie/confetti.json'

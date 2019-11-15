@@ -1,59 +1,36 @@
 import React, { Component } from 'react';
-import {StyleSheet,View,Text,Dimensions, TouchableOpacity, AsyncStorage } from 'react-native';
+import {StyleSheet,View,Text,Dimensions, TouchableOpacity } from 'react-native';
 import {Icon, Header, Left, Right,Body,Title,Switch} from 'native-base'
 import FW5 from 'react-native-vector-icons/FontAwesome5'
-// import Sound from 'react-native-sound';
-
+import { connect } from 'react-redux'
 
 const {width, height} = Dimensions.get('window')
-
-export default class Option extends Component {
+class Option extends Component {
     constructor(props) {
           super(props)
           this.state = {
-            musicPlay:false,
-            switchValue: true,
             switchSon: false,
-            // Sound:new Sound('music.mp3')
           }
     }
-  
-  componentDidMount(){
-      AsyncStorage.getItem('switchValue')
-        .then((switchValue) =>{
-          this.setState({switchValue:switchValue})
-        })
-  }
-
-  toggleSwitch = value =>{
-    AsyncStorage.setItem('switchValue',value); 
-    AsyncStorage.setItem('musicPlay',value); 
-    this.setState({switchValue: value})
-    // if(value === true){
-    //    this.state.Sound.play()
-    //    this.state.Sound.setNumberOfLoops(-1)
-    // }else{
-    //   this.state.Sound.stop()
-    // }
-  }
 
   toggleSwitchSon = value =>{
     this.setState({switchSon: value})
   }
   
   render() {
+    var value = this.props.switch
     return (
       <View style={styles.container}>
           <Header 
               androidStatusBarColor='rgba(0,0,0,0.5)'
               noShadow={true} transparent> 
-	          <Left style={{flex:1, paddingLeft: 7}}>
-	              <Icon name="arrow-back" 
+            <Left style={{flex:1, paddingLeft: 7}}>
+                <Icon name="arrow-back" 
                   style={{color:'white', fontSize:30}}
                   onPress={() =>this.props.navigation.goBack()}
                   />
-	          </Left>
-	          <Right />
+            </Left>
+            <Right />
         </Header>
          
               <FW5 name='cog' style={styles.icon} />
@@ -63,9 +40,8 @@ export default class Option extends Component {
                 <Text style={styles.text}>Activer la Musique</Text>
                 <Switch 
                   style={{fontSize:30}} 
-                  onValueChange = {this.toggleSwitch}
-                  value = {this.state.switchValue}/>
-
+                  onValueChange = {() => this.props.toggle()}
+                  value = {value ? true : false }/>
               </View>
           <View style={styles.padding}>
                 <Text style={[styles.text,{paddingBottom:20} ]}>
@@ -77,7 +53,7 @@ export default class Option extends Component {
 
           </View>
 
-          <TouchableOpacity style={styles.button} >
+          <TouchableOpacity style={styles.button}>
             <Text style={styles.textButton}>Réinitialiser le score</Text>
           </TouchableOpacity>
           </View>
@@ -107,10 +83,10 @@ const styles = StyleSheet.create({
     alignItems:'center',
   },
   button: {
-  	  width: 220,
-  	  height: 40,
-  	  backgroundColor: 'white',
-  	  borderRadius: 30,
+      width: 220,
+      height: 40,
+      backgroundColor: 'white',
+      borderRadius: 30,
       alignSelf: 'center',
     },
   textButton:{
@@ -121,3 +97,14 @@ const styles = StyleSheet.create({
     fontWeight:'bold'
   }
 });
+
+  function mapStateToProps(state){
+    return {switch: state.switch}
+  }
+
+  function mapDispatchToProps(dispatch){
+    return {
+      toggle: () => dispatch({type:'TOGGLE'}),
+    }
+  }
+  export default connect(mapStateToProps, mapDispatchToProps)(Option)

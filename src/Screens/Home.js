@@ -1,68 +1,38 @@
-
 import React from 'react'
-import {StyleSheet, Text, View, TouchableOpacity,AsyncStorage, Dimensions,
-         StatusBar, Alert,BackHandler, ImageBackground, Image,Animated, Easing 
+import {StyleSheet,Text,View,TouchableOpacity,StatusBar, ImageBackground, Image 
         } from 'react-native';
 import FW5 from 'react-native-vector-icons/FontAwesome5'
 import Backhandle from './ExitApp'
 import AB from 'react-native-action-button';
 import SpringAnimated from './SpringAnimated'
-
 import ImgIcon from '../assets/icon.png'
-import chek from '../assets/lottie/check.json'
-import Animation from 'lottie-react-native';
 import Background from '../assets/bg.jpg'
-import * as Progress from 'react-native-progress';
+import {onBack} from '../Utils'
+import { Audio } from 'expo-av';
+import music from '../assets/sounds/music.mp3'
+import { connect } from 'react-redux'
 
-const {width, height} = Dimensions.get('window')
-export default class Home extends React.Component{
-			constructor(props) {
-			    super(props)
-			    this.state = {
-			      musicPlay:false,
-			      showUser:false,
-			      storeScore: 5,
-			      progress: new Animated.Value(0),
-			    }
-		    }
-		     componentDidMount(){
-		     	 Animated.timing(this.state.progress, {
-				      toValue: 1,
-				      duration: 5000,
-				      easing: Easing.linear,
-				    }).start();
+const source = music
+const soundObject = new Audio.Sound();
+class Home extends React.Component{
 
-			      AsyncStorage.getItem('musicPlay')
-			        .then((musicPlay) =>{
-			        	this.setState({musicPlay:musicPlay})
-			        })
-
-		        AsyncStorage.getItem('storeScore')
-		        .then((storeScore) =>{
-		        	if(storeScore > 5)
-		        	   this.setState({storeScore})
-		        })
-			 }
-
-		onBack = () => {
-		    if(true){
-		      Alert.alert(
-		         "Quitter dans l'App",
-		         "Voulez-vous quitter dans Quiz Santé",
-		         [
-		          {text: "Non", onPress: () =>{}, style: "cancel"},
-		          {text: "OUI", onPress:() =>BackHandler.exitApp()},
-		         ],
-		         {cancelable: false}
-		        )
-		      return true;
-		    }
-		    return false;
-		  }
+		playMusic = async (value) =>{
+			try {
+				await soundObject.loadAsync(source);
+				this.play = soundObject
+				if(value == 0) this.play.stopAsync()
+				else{
+					this.play.playAsync()
+					this.play.setIsLoopingAsync(true)
+					this.play.setVolumeAsync(0.1)
+				} 
+			} catch (error) { console.log(error) }
+		}
 
   render(){
-    return (
-    	<Backhandle  onBack={this.onBack} >
+		this.playMusic(this.props.switch)
+    return(
+    	<Backhandle  onBack={onBack}>
     	<ImageBackground style={styles.container} source={Background}>
 
 			<SpringAnimated>
@@ -75,10 +45,6 @@ export default class Home extends React.Component{
 					    <Text  style={{fontWeight:'bold',textAlign:'center' ,color:'#fff', fontSize:17}}>
 					        sur les risques sanitaires
 					    </Text>
-						{/* <View style={{flexDirection:'row'}} >
-							<FW5 name="cog" size={20} style={{color:'white',paddingHorizontal:10}} />
-							<FW5 name="cog" size={20} style={{color:'white',paddingHorizontal:10}} />
-						</View> */}
 				    </View>
 
 
@@ -94,10 +60,10 @@ export default class Home extends React.Component{
 					</TouchableOpacity>
 
 					<TouchableOpacity style={styles.button} onPress={() =>this.props.navigation.navigate('Option')} >
-						<Text style={styles.text} >Option</Text>
+						<Text style={styles.text}>Option</Text>
 					</TouchableOpacity>
 					<TouchableOpacity style={styles.button}
-					    onPress={this.onBack} >
+					    onPress={onBack} >
 						<Text style={styles.text} >Quitter</Text>
 					</TouchableOpacity>
 				</View>
@@ -176,3 +142,9 @@ text:{
     flexDirection: 'column',
   }
 })
+
+  function mapStateToProps(state){
+    return {switch: state.switch}
+  }
+
+  export default connect(mapStateToProps)(Home)
