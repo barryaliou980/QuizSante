@@ -16,18 +16,18 @@ const source = music
 const soundObject = new Audio.Sound();
 class Home extends React.Component{
 
-		playMusic = async (value) =>{
-			try {
-				await soundObject.loadAsync(source);
-				this.play = soundObject
-				if(value == 0) this.play.stopAsync()
-				else{
-					this.play.playAsync()
-					this.play.setIsLoopingAsync(true)
-					this.play.setVolumeAsync(0.1)
-				} 
-			} catch (error) { console.log(error) }
-		}
+	playMusic = async (value) =>{
+		try {
+			await soundObject.loadAsync(source);
+			this.play = soundObject
+			if(value == 0) this.play.stopAsync()
+			else{
+				this.play.playAsync()
+				this.play.setIsLoopingAsync(true)
+				this.play.setVolumeAsync(0.1)
+			} 
+		} catch (error) { console.log(error) }
+	}
 
   render(){
 		this.playMusic(this.props.switch)

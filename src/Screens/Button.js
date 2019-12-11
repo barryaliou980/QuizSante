@@ -16,7 +16,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontWeight:'bold',
     fontSize:15,
-    marginLeft: 20
+    marginLeft: 20,
+    marginRight:50
   },
   icon:{
     backgroundColor:'#fff',
@@ -30,6 +31,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 20,
+    marginHorizontal:5
   }
 });
 

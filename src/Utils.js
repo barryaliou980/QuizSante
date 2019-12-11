@@ -4,17 +4,6 @@ import {StyleSheet,View,Alert,BackHandler} from 'react-native'
 import * as Progress from 'react-native-progress';
 import { createStore } from 'redux';
 
-// les icones pour les bonnes reponses
-import check from './assets/lottie/check.json'
-import waou from './assets/lottie/waou.json'
-import like from './assets/lottie/like.json'
-
-// les icones pour les mauvaises reponses
-import angry1 from './assets/lottie/angry1.json'
-import angry3 from './assets/lottie/angry3.json'
-import dislike from './assets/lottie/dislike.json'
-
-
 export const HeaderCustom = props => {
 	return( 
        <Header androidStatusBarColor='rgba(0,0,0,0.5)' noShadow={true} transparent>
@@ -56,15 +45,38 @@ export const ProgressBar = props =>{
 	return(
 
 			<View style={{flex:1, paddingTop:props.padding}} > 
-			   <Progress.Bar progress={props.score/10} width={200} />
+			   <Progress.Bar progress={props.score/10} width={200} animationType="timing" />
 			</View>
 			
 	)
 }
 
-export const vrai_icon = [check, waou,like]
-export const faux_icon = [angry1,angry3,dislike]
+export const ProgressCircle = () => {  
+    return (  
+       <View  style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+         <Progress.Circle
+            size={200}
+            progress={1}
+            endAngle={0.5}
+            direction="clockwise"
+            thickness={3}
+            strokeCap="round"
+          />
+       </View> 
+      
+    );  
+} 
+
+
 const styles = StyleSheet.create({
+container:{
+  flex:1,
+  justifyContent:'center',
+  alignItems:'center'
+},
+progress:{
+	margin:10
+},
 icon:{
 		fontSize: 30
 	},
@@ -86,7 +98,7 @@ inner:{
 })
 
 
-const initialState = {switch:1}
+	const initialState = {switch:1}
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case 'TOGGLE':

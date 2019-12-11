@@ -3,8 +3,8 @@ import {SafeAreaView,StyleSheet,Text,View,Dimensions,Alert} from "react-native";
 import { quizData } from "../Data/quizData";
 import { Button, ButtonContainer } from "./Button";
 import Backhandle from './ExitApp'
-import {ProgressBar} from '../Utils'
-import {AlertIcon} from './AlertIcon'
+import {ProgressBar,vrai_icon,faux_icon} from '../Utils'
+import LottieView from 'lottie-react-native';
 
 
 const { width, height } = Dimensions.get('window')
@@ -22,17 +22,19 @@ export default class Quiz extends React.Component {
       isDisable: false,
       answerCorrect: false,
       totalCount: 0,
-      randomQuestion:0
     }
   }
 
   componentDidMount(){
     this.setState({
-      totalCount:this.state.quizData.length,
-      randomQuestion:this.random()
+      totalCount:this.state.quizData.length
     })
   }
-  
+  Icons = icon => icon[Math.floor(Math.random() * icon.length)]
+  alertIcon(correct){
+    const icon = correct ? this.Icons(vrai_icon) : this.Icons(faux_icon)
+    return <LottieView source={icon} autoPlay loop={false} />;
+  }
 
   random(){
    const {quizData,answerCorrect} = this.state
@@ -57,18 +59,20 @@ export default class Quiz extends React.Component {
 
   answer = (correct,question,id) => {
     this.setState({isDisable:true})
+    this.alertIcon()
     this.setState(
       state => {
         const nextState = { answered: true };
         if (correct) {
           nextState.score = state.score + 1;
           nextState.answerCorrect = true;
+          // alert(question)
         } else {
           nextState.answerCorrect = false;
         }
 
         return nextState;
-      }, () => { setTimeout(() => this.nextQuestion(), 1200); }
+      }, () => { setTimeout(() => this.nextQuestion(), 1000); }
     );
   };
 
@@ -79,8 +83,7 @@ export default class Quiz extends React.Component {
         return {
           activeQuestionIndex: nextIndex,
           answered: false,
-          isDisable:false,
-          randomQuestion:this.random()
+          isDisable:false
         };
       } else{
           this.props.navigation.navigate('FinQuiz',{
@@ -93,8 +96,8 @@ export default class Quiz extends React.Component {
   };
 
   render() {
-   const {q = quizData,isDisable,answerCorrect,randomQuestion} = this.state
-   const question = q[randomQuestion];
+   const {q = quizData,isDisable,answerCorrect} = this.state
+   const question = q[this.random()];
     return (
       <Backhandle  onBack={this.onBack}>
       <View style={styles.container}>
@@ -114,6 +117,7 @@ export default class Quiz extends React.Component {
                 </Text>
             </View>
 
+            {isDisable && this.alertIcon(answerCorrect)}
             <ButtonContainer>
               {question.answers.map(answer => (
                 <Button
@@ -129,7 +133,6 @@ export default class Quiz extends React.Component {
           </View>
 
         </SafeAreaView>
-        
       </View>
       </Backhandle>
     ); 
